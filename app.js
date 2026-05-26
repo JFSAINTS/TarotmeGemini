@@ -62,6 +62,85 @@ const LS_DISCLAIMER = 'tarotmegem_disclaimer_shown';
 const LS_LANG       = 'tarotmegem_lang';
 
 // ═══════════════════════════════════════
+// INDEXED DB — persistent backup
+// Survives localStorage clears; only truly deleted when user clicks "Eliminar clave"
+// ═══════════════════════════════════════
+const DB_NAME    = 'tarotmegem-db';
+const DB_STORE   = 'kv';
+const DB_VERSION = 1;
+
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(DB_STORE);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function idbGet(key) {
+  try {
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx  = db.transaction(DB_STORE, 'readonly');
+      const req = tx.objectStore(DB_STORE).get(key);
+      req.onsuccess = () => resolve(req.result ?? null);
+      req.onerror   = () => reject(req.error);
+    });
+  } catch { return null; }
+}
+
+async function idbSave(key, value) {
+  try {
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx  = db.transaction(DB_STORE, 'readwrite');
+      const req = tx.objectStore(DB_STORE).put(value, key);
+      req.onsuccess = () => resolve();
+      req.onerror   = () => reject(req.error);
+    });
+  } catch { /* non-fatal */ }
+}
+
+async function idbDel(key) {
+  try {
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx  = db.transaction(DB_STORE, 'readwrite');
+      const req = tx.objectStore(DB_STORE).delete(key);
+      req.onsuccess = () => resolve();
+      req.onerror   = () => reject(req.error);
+    });
+  } catch { /* non-fatal */ }
+}
+
+/** Write to localStorage AND IndexedDB simultaneously. */
+async function storeSave(key, value) {
+  localStorage.setItem(key, value);
+  await idbSave(key, value);
+}
+
+/** Remove from localStorage AND IndexedDB simultaneously. */
+async function storeDel(key) {
+  localStorage.removeItem(key);
+  await idbDel(key);
+}
+
+/**
+ * On startup: if any critical key is missing from localStorage
+ * (e.g. browser cleared it), restore it from IndexedDB.
+ */
+async function restoreStorage() {
+  const keys = [LS_API_KEY, LS_DISCLAIMER, LS_LANG];
+  for (const key of keys) {
+    if (!localStorage.getItem(key)) {
+      const val = await idbGet(key);
+      if (val) localStorage.setItem(key, val);
+    }
+  }
+}
+
+// ═══════════════════════════════════════
 // STARFIELD CANVAS
 // ═══════════════════════════════════════
 function initStarfield() {
@@ -208,7 +287,8 @@ function renderFAQ() {
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
-function init() {
+async function init() {
+  await restoreStorage();
   initStarfield();
 
   if (!localStorage.getItem(LS_DISCLAIMER)) {
@@ -227,6 +307,7 @@ function init() {
 langBtn.addEventListener('click', () => {
   const next = getLang() === 'es' ? 'en' : 'es';
   setLang(next);
+  idbSave(LS_LANG, next); // keep IDB in sync (fire-and-forget)
   applyTranslations();
 });
 
@@ -234,7 +315,7 @@ langBtn.addEventListener('click', () => {
 // DISCLAIMER
 // ═══════════════════════════════════════
 disclaimerAccept.addEventListener('click', () => {
-  localStorage.setItem(LS_DISCLAIMER, '1');
+  storeSave(LS_DISCLAIMER, '1'); // fire-and-forget async
   disclaimerModal.classList.add('hidden');
 });
 
@@ -259,7 +340,7 @@ apiKeyInput.addEventListener('focus', () => {
   if (apiKeyInput.value.startsWith('•')) apiKeyInput.value = '';
 });
 
-apiKeySave.addEventListener('click', () => {
+apiKeySave.addEventListener('click', async () => {
   const key = apiKeyInput.value.trim();
   if (!key || key.startsWith('•')) {
     settingsStatus.style.color = 'var(--warn)';
@@ -271,15 +352,15 @@ apiKeySave.addEventListener('click', () => {
     settingsStatus.textContent = t('settings_prefix');
     return;
   }
-  localStorage.setItem(LS_API_KEY, key);
+  await storeSave(LS_API_KEY, key);
   actualizarEstadoApiKey();
   settingsStatus.style.color = 'var(--success)';
   settingsStatus.textContent = t('settings_saved');
   setTimeout(() => settingsModal.classList.add('hidden'), 1400);
 });
 
-apiKeyClear.addEventListener('click', () => {
-  localStorage.removeItem(LS_API_KEY);
+apiKeyClear.addEventListener('click', async () => {
+  await storeDel(LS_API_KEY);
   apiKeyInput.value = '';
   actualizarEstadoApiKey();
   settingsStatus.style.color = 'var(--text3)';
