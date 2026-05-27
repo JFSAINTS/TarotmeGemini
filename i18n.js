@@ -17,19 +17,6 @@ const UI = {
     disc_accept:  'Entendido, continuar',
     banner_text:  '⚠️ Las lecturas son orientativas y para reflexión personal. No sustituyen asesoramiento profesional.',
 
-    // Settings
-    settings_title:   '⚙️ Configuración',
-    settings_body:    'Para usar la lectura con IA necesitas una clave de API de Google AI Studio. Es completamente gratuita, no requiere tarjeta de crédito.',
-    settings_label:   'Clave de API de Google AI Studio',
-    settings_link:    'Obtener clave gratuita en aistudio.google.com →',
-    settings_save:    'Guardar',
-    settings_clear:   'Eliminar clave',
-    settings_saved:   '✓ Clave guardada correctamente.',
-    settings_nochange:'La clave no cambió.',
-    settings_invalid: 'Introduce una clave válida.',
-    settings_prefix:  'La clave debe empezar por AIza…',
-    settings_deleted: 'Clave eliminada.',
-
     // Cards section
     cards_title:    'Las 78 Cartas del Tarot Rider-Waite',
     cards_subtitle: 'Pulsa cualquier carta para ver su significado completo',
@@ -54,31 +41,30 @@ const UI = {
 
     // Reading section
     reading_title:    'Tu Lectura Personalizada',
-    reading_subtitle: 'Sube una foto de tu tirada y escribe tu pregunta. Gemini AI interpretará las cartas como una tarotista experimentada.',
-    api_notice_title: 'Clave de API necesaria',
-    api_notice_body:  'Para usar la lectura con IA necesitas tu clave gratuita de Google AI Studio. Sin tarjeta de crédito.',
-    api_notice_btn:   'Configurar ahora',
-    step1_label:      'Fotografía tu tirada',
+    reading_subtitle: 'Sube una foto de tu tirada (opcional), escribe tu pregunta y ábrela en Gemini con tu cuenta de Google. Sin API key, sin coste.',
+    step1_label:      '📷 Foto de tu tirada (opcional)',
     upload_title:     'Arrastra aquí la foto de tu tirada',
     upload_or:        'o <strong>haz clic para seleccionar</strong>',
     upload_hint:      'Acepta JPG, PNG, WEBP',
     step2_label:      'Tu pregunta o tema',
     question_ph:      'Escribe aquí tu pregunta o el tema sobre el que quieres reflexionar…\nEjemplo: ¿Cómo está mi situación sentimental en este momento?\nEjemplo: Quiero entender qué me dice el tarot sobre mi trabajo.',
-    read_btn:         'Interpretar tirada',
-    reading_btn_wait: 'Interpretando…',
-    result_title:     '✦ Tu lectura',
-    result_disclaimer:'⚠️ Esta interpretación es orientativa y para reflexión personal. No la tomes como verdad absoluta.',
+    read_btn:         '✦ Abrir en Gemini',
+    reading_btn_wait: 'Preparando…',
     new_reading:      'Nueva lectura',
-    api_key_title:    'Sin clave de API configurada',
-    err_no_resp:      'No se pudo obtener una respuesta.',
-    err_title:        '⚠️ No se pudo completar la lectura.',
-    err_check:        'Comprueba que tu clave de API es válida en',
-    err_blocked:      'La respuesta fue bloqueada por los filtros de seguridad de Gemini. Intenta con una imagen más clara.',
-    reading_thinking: 'Gemini está leyendo las cartas…',
-    api_dot_on:       'Clave de API configurada',
-    api_dot_off:      'Sin clave de API configurada',
 
-    // Reading AI prompt pieces
+    // Gemini web guide (shown after clicking the button)
+    gemini_step_attach:   'En Gemini, adjunta la imagen de tu tirada (icono 📎 o arrastra el archivo)',
+    gemini_step_paste_ok: '✓ Consulta copiada — pégala en Gemini con <kbd>Ctrl+V</kbd> / <kbd>⌘V</kbd> y pulsa enviar',
+    gemini_step_paste:    'Copia la consulta de abajo y pégala en el chat de Gemini',
+    gemini_step_send:     'Pulsa enviar en Gemini y espera tu lectura 🔮',
+    gemini_prompt_label:  'Tu consulta para Gemini:',
+    gemini_copy_btn:      '📋 Copiar consulta',
+    gemini_copied:        'Copiado ✓',
+    gemini_open_btn:      '✦ Abrir Gemini de nuevo',
+    gemini_download_img:  '⬇ Descargar imagen',
+    gemini_tab_opened:    'Se abrió Gemini en una nueva pestaña.',
+
+    // Reading AI prompt pieces (sent to Gemini web)
     prompt_with_q:    'Mi pregunta o tema es: "{q}"\n\nPor favor interpreta las cartas que ves en la imagen en relación con este tema.',
     prompt_general:   'Por favor interpreta las cartas que ves en la imagen de forma general.',
 
@@ -94,80 +80,69 @@ const UI = {
 
     // FAQ
     faq_title:    'Preguntas Frecuentes',
-    faq_subtitle: 'Todo lo que necesitas saber sobre TarotMe Gemini y la clave gratuita de Google',
+    faq_subtitle: 'Todo lo que necesitas saber sobre TarotMe Gemini',
     faq_groups: [
       {
         title: '⚙️ Uso general',
         items: [
           {
-            q: '¿Necesito pagar para usar TarotMe Gemini?',
+            q: '¿Necesito pagar o registrarme para usar TarotMe Gemini?',
             open: true,
-            a: `<p>La <strong>biblioteca de las 78 cartas</strong> es completamente gratuita y no requiere ninguna cuenta ni clave. Puedes explorar todas las cartas, sus significados y simbolismo sin límite.</p>
-<p>La <strong>lectura personalizada con IA</strong> usa Google Gemini. La clave de API de Google AI Studio es <strong>gratuita</strong> para uso personal, sin tarjeta de crédito.</p>`
+            a: `<p>No. TarotMe Gemini es <strong>completamente gratuito</strong>. No necesitas cuenta, no necesitas API key ni tarjeta de crédito.</p>
+<p>La <strong>biblioteca de las 78 cartas</strong> funciona sin ningún requisito. La <strong>lectura con IA</strong> abre <a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a> directamente en tu navegador usando tu cuenta de Google, si la tienes.</p>`
           },
           {
             q: '¿Qué modelo de IA usa TarotMe Gemini?',
-            a: `<p>TarotMe Gemini utiliza <strong>Gemini 2.0 Flash</strong> de Google, un modelo multimodal avanzado capaz de analizar imágenes y texto simultáneamente. Está configurado para interpretar las cartas con un estilo cálido y cercano.</p>`
+            a: `<p>TarotMe Gemini abre <strong>Gemini</strong> de Google en su web oficial. El modelo exacto depende de tu cuenta: usuarios con cuenta de Google usan Gemini 2.0 Flash o superior. Las instrucciones del prompt están optimizadas para obtener lecturas cálidas y detalladas.</p>`
           },
           {
-            q: '¿Es segura mi clave de API?',
-            a: `<p>Tu clave de API se guarda <strong>únicamente en tu dispositivo</strong> (localStorage del navegador) y nunca se envía a ningún servidor de TarotMe. Las solicitudes van directamente desde tu navegador a la API de Google.</p>
-<p>⚠️ Nunca compartas tu clave con nadie ni la introduzcas en páginas desconocidas.</p>`
+            q: '¿Mis consultas son privadas?',
+            a: `<p>Sí. TarotMe Gemini <strong>no almacena ni procesa tus consultas</strong>. El texto se copia al portapapeles de tu dispositivo y tú lo pegas directamente en Gemini. La conversación es exclusivamente entre tú y Google.</p>
+<p>⚠️ Ten en cuenta que lo que envíes a Gemini queda sujeto a la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">política de privacidad de Google</a>.</p>`
           }
         ]
       },
       {
-        title: '🔑 Clave gratuita de Google AI Studio',
+        title: '🌐 Cómo funciona la lectura',
         items: [
           {
-            q: '¿Cuántas lecturas puedo hacer gratis?',
+            q: '¿Cómo funciona el flujo de lectura?',
             open: true,
-            a: `<p>La API de Google Gemini tiene un <strong>nivel gratuito muy generoso</strong>, sin necesidad de tarjeta de crédito:</p>
-<div class="faq-table-wrap"><table class="faq-table">
-<thead><tr><th>Límite</th><th>Gemini 2.0 Flash (gratuito)</th></tr></thead>
-<tbody>
-<tr><td>Solicitudes por minuto</td><td><strong>15 RPM</strong></td></tr>
-<tr><td>Solicitudes por día</td><td><strong>1.500 lecturas/día</strong></td></tr>
-<tr><td>Tokens por minuto</td><td>1.000.000 TPM</td></tr>
-<tr><td>Coste</td><td>✅ <strong>Gratis</strong> (sin tarjeta)</td></tr>
-</tbody></table></div>
-<p class="faq-note">💡 Con 1.500 lecturas diarias gratuitas, el nivel gratuito cubre perfectamente el uso personal sin ningún coste.</p>`
-          },
-          {
-            q: '¿Cómo obtengo mi clave gratuita de Google AI Studio?',
             a: `<ol class="faq-steps">
-<li>Ve a <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a> con tu cuenta de Google.</li>
-<li>Pulsa <strong>Create API key</strong>.</li>
-<li>Copia la clave (empieza por <code>AIzaSy</code>).</li>
-<li>En TarotMe Gemini, pulsa ⚙️ en la cabecera y pega tu clave.</li>
+<li><strong>Sube una foto de tu tirada</strong> (opcional pero recomendado). Acepta JPG, PNG y WEBP.</li>
+<li><strong>Escribe tu pregunta</strong> o el tema sobre el que quieres reflexionar.</li>
+<li>Pulsa <strong>"Abrir en Gemini"</strong>. La consulta se copia automáticamente al portapapeles y se abre Gemini en una nueva pestaña.</li>
+<li>En Gemini, <strong>adjunta la imagen</strong> (si la tienes) con el ícono 📎 y <strong>pega el texto</strong> con Ctrl+V / ⌘V.</li>
+<li>Pulsa enviar y espera tu lectura 🔮</li>
 </ol>
-<p class="faq-note">🎁 No se pide tarjeta de crédito. Solo necesitas una cuenta de Google.</p>`
+<p class="faq-note">💡 Si Gemini te pide iniciar sesión con Google, hazlo. La lectura es gratuita con cualquier cuenta.</p>`
           },
           {
-            q: '¿Qué pasa si supero el límite gratuito?',
-            a: `<p>Si superas las 1.500 solicitudes diarias o los 15 por minuto, recibirás un error <code>RESOURCE_EXHAUSTED</code>. En ese caso, espera unos minutos o hasta el día siguiente para que se renueve el cupo.</p>
-<p>Si necesitas más capacidad, puedes activar facturación en Google Cloud para usar cuotas superiores (con cargo por uso), pero para el <strong>uso personal es prácticamente imposible agotar el nivel gratuito</strong>.</p>`
+            q: '¿Necesito una cuenta de Google?',
+            a: `<p>Para usar <strong>Gemini web</strong> sí necesitas una cuenta de Google. Sin embargo, TarotMe Gemini (esta app) <strong>no requiere ninguna cuenta</strong>: la biblioteca de cartas, el buscador y el preparador de consultas funcionan sin registro.</p>
+<p>Si no tienes cuenta de Google, puedes copiar la consulta y pegarla en cualquier otro servicio de IA (ChatGPT, Claude, etc.) que prefieras.</p>`
+          },
+          {
+            q: '¿Es obligatorio subir una imagen?',
+            a: `<p>No. La imagen es <strong>opcional</strong>. Si no tienes foto de tu tirada, puedes describir las cartas en el campo de pregunta (por ejemplo: "Tengo el Sol, la Luna y el Mundo") y Gemini las interpretará igualmente.</p>
+<p>Si subes una imagen, Gemini puede identificar las cartas visualmente y ofrecer una lectura más precisa.</p>`
           }
         ]
       },
       {
-        title: '🔧 Errores comunes',
+        title: '🔧 Problemas frecuentes',
         items: [
           {
-            q: 'Error: <code>API_KEY_INVALID</code>',
-            a: '<p>La clave introducida no es válida. Comprueba que empieza por <code>AIzaSy</code> y que la copiaste completa sin espacios. Genera una nueva en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a>.</p>'
+            q: 'Pulso el botón pero Gemini no se abre',
+            a: '<p>Es posible que tu navegador haya bloqueado la apertura de la nueva pestaña. Comprueba si hay un aviso de "popup bloqueado" en la barra de direcciones y permítelo. También puedes usar el botón <strong>"Abrir Gemini de nuevo"</strong> que aparece en la guía de pasos.</p>'
           },
           {
-            q: 'Error: <code>RESOURCE_EXHAUSTED</code>',
-            a: '<p>Has alcanzado el límite de solicitudes del nivel gratuito (15/minuto o 1.500/día). Espera unos minutos o hasta el día siguiente para que se renueve.</p>'
+            q: 'El portapapeles no funcionó — no puedo pegar el texto',
+            a: '<p>El texto de la consulta aparece también en el recuadro de la guía. Puedes seleccionarlo y copiarlo manualmente. El botón <strong>"📋 Copiar consulta"</strong> también lo vuelve a copiar al portapapeles.</p>'
           },
           {
-            q: 'Error: <code>UNAVAILABLE</code> o sin respuesta',
-            a: '<p>Los servidores de Google están temporalmente sobrecargados. Es un problema del lado del servidor. Espera unos segundos y vuelve a intentarlo.</p>'
-          },
-          {
-            q: 'La respuesta fue bloqueada (filtros de seguridad)',
-            a: '<p>Gemini bloqueó la respuesta por sus filtros de contenido. Asegúrate de que la imagen muestra claramente cartas de tarot y que la pregunta no contiene lenguaje que pueda ser interpretado de forma inapropiada.</p>'
+            q: 'Gemini no reconoce las cartas de la imagen',
+            a: '<p>Asegúrate de que la foto esté bien iluminada y las cartas sean claramente visibles. Si Gemini no las identifica correctamente, puedes ayudarle mencionando los nombres de las cartas en el campo de pregunta.</p>'
           }
         ]
       },
@@ -191,7 +166,7 @@ const UI = {
 <p><strong>2. Formula una pregunta clara.</strong> Las mejores preguntas empiezan con "¿Qué me dice el tarot sobre…?", "¿Cómo puedo…?" o "¿Qué debo saber sobre…?". Evita preguntas de sí/no.</p>
 <p><strong>3. Corta el mazo en tres montones.</strong> Con la mano no dominante, divide en tres pilas y vuelve a juntarlas en el orden que sientas correcto.</p>
 <p><strong>4. Coloca las cartas boca abajo</strong> en las posiciones de la tirada elegida antes de darles la vuelta.</p>
-<p><strong>5. Fotografía la tirada</strong> y súbela a TarotMe Gemini para obtener tu lectura. 📷</p>
+<p><strong>5. Fotografía la tirada</strong>, súbela en TarotMe Gemini, escribe tu pregunta y pulsa <em>Abrir en Gemini</em>. 📷</p>
 </div>`
           },
           {
@@ -303,19 +278,6 @@ Pautas importantes:
     disc_accept:  'Understood, continue',
     banner_text:  '⚠️ Readings are for guidance and personal reflection only. They do not replace professional advice.',
 
-    // Settings
-    settings_title:   '⚙️ Settings',
-    settings_body:    'To use the AI reading you need a Google AI Studio API key. It is completely free — no credit card required.',
-    settings_label:   'Google AI Studio API Key',
-    settings_link:    'Get your free key at aistudio.google.com →',
-    settings_save:    'Save',
-    settings_clear:   'Remove key',
-    settings_saved:   '✓ Key saved successfully.',
-    settings_nochange:'The key did not change.',
-    settings_invalid: 'Please enter a valid key.',
-    settings_prefix:  'The key must start with AIza…',
-    settings_deleted: 'Key removed.',
-
     // Cards section
     cards_title:    'The 78 Rider-Waite Tarot Cards',
     cards_subtitle: 'Click any card to see its full meaning',
@@ -340,31 +302,30 @@ Pautas importantes:
 
     // Reading section
     reading_title:    'Your Personalized Reading',
-    reading_subtitle: 'Upload a photo of your spread and write your question. Gemini AI will interpret the cards like an experienced tarot reader.',
-    api_notice_title: 'API Key required',
-    api_notice_body:  'To use the AI reading you need your free Google AI Studio API key. No credit card needed.',
-    api_notice_btn:   'Configure now',
-    step1_label:      'Photograph your spread',
+    reading_subtitle: 'Upload a spread photo (optional), write your question and open it in Gemini with your Google account. No API key, no cost.',
+    step1_label:      '📷 Spread photo (optional)',
     upload_title:     'Drag your spread photo here',
     upload_or:        'or <strong>click to select</strong>',
     upload_hint:      'Accepts JPG, PNG, WEBP',
     step2_label:      'Your question or topic',
     question_ph:      'Write your question or the topic you want to reflect on…\nExample: What does the tarot say about my love life right now?\nExample: I want to understand what the cards say about my career.',
-    read_btn:         'Interpret spread',
-    reading_btn_wait: 'Reading…',
-    result_title:     '✦ Your reading',
-    result_disclaimer:'⚠️ This interpretation is for guidance and personal reflection. Do not take it as absolute truth.',
+    read_btn:         '✦ Open in Gemini',
+    reading_btn_wait: 'Preparing…',
     new_reading:      'New reading',
-    api_key_title:    'No API key configured',
-    err_no_resp:      'Could not get a response.',
-    err_title:        '⚠️ Could not complete the reading.',
-    err_check:        'Check that your API key is valid at',
-    err_blocked:      'The response was blocked by Gemini safety filters. Try with a clearer image of tarot cards.',
-    reading_thinking: 'Gemini is reading the cards…',
-    api_dot_on:       'API key configured',
-    api_dot_off:      'No API key configured',
 
-    // Reading AI prompt pieces
+    // Gemini web guide (shown after clicking the button)
+    gemini_step_attach:   'In Gemini, attach your spread image (📎 icon or drag the file)',
+    gemini_step_paste_ok: '✓ Query copied — paste it in Gemini with <kbd>Ctrl+V</kbd> / <kbd>⌘V</kbd> and press send',
+    gemini_step_paste:    'Copy the query below and paste it in the Gemini chat',
+    gemini_step_send:     'Press send in Gemini and wait for your reading 🔮',
+    gemini_prompt_label:  'Your query for Gemini:',
+    gemini_copy_btn:      '📋 Copy query',
+    gemini_copied:        'Copied ✓',
+    gemini_open_btn:      '✦ Open Gemini again',
+    gemini_download_img:  '⬇ Download image',
+    gemini_tab_opened:    'Gemini opened in a new tab.',
+
+    // Reading AI prompt pieces (sent to Gemini web)
     prompt_with_q:    'My question or topic is: "{q}"\n\nPlease interpret the cards you see in the image in relation to this topic.',
     prompt_general:   'Please interpret the cards you see in the image in a general way.',
 
@@ -380,80 +341,69 @@ Pautas importantes:
 
     // FAQ
     faq_title:    'Frequently Asked Questions',
-    faq_subtitle: 'Everything you need to know about TarotMe Gemini and your free Google API key',
+    faq_subtitle: 'Everything you need to know about TarotMe Gemini',
     faq_groups: [
       {
         title: '⚙️ General use',
         items: [
           {
-            q: 'Do I need to pay to use TarotMe Gemini?',
+            q: 'Do I need to pay or sign up to use TarotMe Gemini?',
             open: true,
-            a: `<p>The <strong>78-card library</strong> is completely free and requires no account or key.</p>
-<p>The <strong>personalized AI reading</strong> uses Google Gemini. The Google AI Studio API key is <strong>completely free</strong> for personal use — no credit card required.</p>`
+            a: `<p>No. TarotMe Gemini is <strong>completely free</strong>. No account, no API key, no credit card required.</p>
+<p>The <strong>78-card library</strong> works with no requirements. The <strong>AI reading</strong> opens <a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a> directly in your browser using your Google account, if you have one.</p>`
           },
           {
             q: 'Which AI model does TarotMe Gemini use?',
-            a: `<p>TarotMe Gemini uses <strong>Gemini 2.0 Flash</strong> by Google, an advanced multimodal model capable of analyzing images and text simultaneously. It is configured to interpret cards with a warm and personal style.</p>`
+            a: `<p>TarotMe Gemini opens Google's official <strong>Gemini</strong> web app. The exact model depends on your account — Google account holders typically get Gemini 2.0 Flash or higher. The prompt instructions are optimised for warm, detailed tarot readings.</p>`
           },
           {
-            q: 'Is my API key safe?',
-            a: `<p>Your API key is stored <strong>only on your device</strong> (browser localStorage) and is never sent to any TarotMe server. Requests go directly from your browser to Google's API.</p>
-<p>⚠️ Never share your key with anyone or enter it on unknown sites.</p>`
+            q: 'Are my readings private?',
+            a: `<p>Yes. TarotMe Gemini <strong>does not store or process your queries</strong>. The text is copied to your device's clipboard and you paste it directly into Gemini. The conversation is exclusively between you and Google.</p>
+<p>⚠️ Keep in mind that what you send to Gemini is subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</p>`
           }
         ]
       },
       {
-        title: '🔑 Free Google AI Studio key',
+        title: '🌐 How the reading works',
         items: [
           {
-            q: 'How many free readings can I do?',
+            q: 'How does the reading flow work?',
             open: true,
-            a: `<p>The Gemini API has a <strong>very generous free tier</strong>, no credit card needed:</p>
-<div class="faq-table-wrap"><table class="faq-table">
-<thead><tr><th>Limit</th><th>Gemini 2.0 Flash (free)</th></tr></thead>
-<tbody>
-<tr><td>Requests per minute</td><td><strong>15 RPM</strong></td></tr>
-<tr><td>Requests per day</td><td><strong>1,500 readings/day</strong></td></tr>
-<tr><td>Tokens per minute</td><td>1,000,000 TPM</td></tr>
-<tr><td>Cost</td><td>✅ <strong>Free</strong> (no card)</td></tr>
-</tbody></table></div>
-<p class="faq-note">💡 1,500 free daily readings is more than enough for personal use at zero cost.</p>`
-          },
-          {
-            q: 'How do I get my free Google AI Studio key?',
             a: `<ol class="faq-steps">
-<li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a> with your Google account.</li>
-<li>Click <strong>Create API key</strong>.</li>
-<li>Copy the key (starts with <code>AIzaSy</code>).</li>
-<li>In TarotMe Gemini, click ⚙️ in the header and paste your key.</li>
+<li><strong>Upload a photo of your spread</strong> (optional but recommended). Accepts JPG, PNG and WEBP.</li>
+<li><strong>Type your question</strong> or the topic you want to reflect on.</li>
+<li>Click <strong>"Open in Gemini"</strong>. The query is automatically copied to your clipboard and Gemini opens in a new tab.</li>
+<li>In Gemini, <strong>attach the image</strong> (if you have one) with the 📎 icon and <strong>paste the text</strong> with Ctrl+V / ⌘V.</li>
+<li>Press send and wait for your reading 🔮</li>
 </ol>
-<p class="faq-note">🎁 No credit card required. Only a Google account.</p>`
+<p class="faq-note">💡 If Gemini asks you to sign in with Google, do so. Reading is free with any account.</p>`
           },
           {
-            q: 'What happens if I exceed the free limit?',
-            a: `<p>If you exceed 1,500 daily requests or 15 per minute, you will receive a <code>RESOURCE_EXHAUSTED</code> error. In that case, wait a few minutes or until the next day for the quota to renew.</p>
-<p>For <strong>personal use it is practically impossible to exhaust the free tier</strong>.</p>`
+            q: 'Do I need a Google account?',
+            a: `<p>To use <strong>Gemini web</strong> you need a Google account. However, TarotMe Gemini (this app) <strong>requires no account</strong>: the card library, search, and query builder all work without registration.</p>
+<p>If you don't have a Google account, you can copy the query and paste it into any other AI service (ChatGPT, Claude, etc.) that you prefer.</p>`
+          },
+          {
+            q: 'Is the image required?',
+            a: `<p>No. The image is <strong>optional</strong>. If you don't have a photo of your spread, you can describe the cards in the question field (e.g. "I have The Sun, The Moon and The World") and Gemini will still interpret them.</p>
+<p>If you upload an image, Gemini can visually identify the cards and provide a more accurate reading.</p>`
           }
         ]
       },
       {
-        title: '🔧 Common errors',
+        title: '🔧 Common issues',
         items: [
           {
-            q: 'Error: <code>API_KEY_INVALID</code>',
-            a: '<p>The key is not valid. Make sure it starts with <code>AIzaSy</code> and was copied completely without extra spaces. Generate a new one at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a>.</p>'
+            q: "I clicked the button but Gemini didn't open",
+            a: '<p>Your browser may have blocked the new tab. Look for a "popup blocked" notice in the address bar and allow it. You can also use the <strong>"Open Gemini again"</strong> button that appears in the step guide.</p>'
           },
           {
-            q: 'Error: <code>RESOURCE_EXHAUSTED</code>',
-            a: '<p>You have reached the free tier request limit (15/min or 1,500/day). Wait a few minutes or until the next day for the quota to renew.</p>'
+            q: "Clipboard didn't work — I can't paste the text",
+            a: '<p>The query text also appears in the guide box. You can select and copy it manually. The <strong>"📋 Copy query"</strong> button will also copy it to your clipboard again.</p>'
           },
           {
-            q: 'Error: <code>UNAVAILABLE</code> or no response',
-            a: '<p>Google servers are temporarily overloaded. Wait a few seconds and try again.</p>'
-          },
-          {
-            q: 'Response blocked by safety filters',
-            a: '<p>Gemini blocked the response due to its content filters. Make sure the image clearly shows tarot cards and the question does not contain language that could be misinterpreted.</p>'
+            q: "Gemini doesn't recognise the cards in the image",
+            a: '<p>Make sure the photo is well-lit and the cards are clearly visible. If Gemini doesn\'t identify them correctly, you can help by mentioning the card names in the question field.</p>'
           }
         ]
       },
@@ -477,7 +427,7 @@ Pautas importantes:
 <p><strong>2. Formulate a clear question.</strong> Start with "What does the tarot say about…?", "How can I…?" or "What should I know about…?". Avoid yes/no questions.</p>
 <p><strong>3. Cut into three piles</strong> with your non-dominant hand, then reassemble in whatever order feels right.</p>
 <p><strong>4. Place cards face down</strong> in the spread positions before turning them over.</p>
-<p><strong>5. Photograph the spread</strong> and upload it to TarotMe Gemini. 📷</p>
+<p><strong>5. Photograph the spread</strong>, upload it in TarotMe Gemini, write your question and click <em>Open in Gemini</em>. 📷</p>
 </div>`
           },
           {

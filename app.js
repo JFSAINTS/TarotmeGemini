@@ -20,15 +20,6 @@ const $ = id => document.getElementById(id);
 
 const disclaimerModal  = $('disclaimer-modal');
 const disclaimerAccept = $('disclaimer-accept');
-const settingsModal    = $('settings-modal');
-const settingsBtn      = $('settings-btn');
-const settingsClose    = $('settings-close');
-const apiKeyInput      = $('api-key-input');
-const apiKeySave       = $('api-key-save');
-const apiKeyClear      = $('api-key-clear');
-const settingsStatus   = $('settings-status');
-const apiDot           = $('api-dot');
-const apiNotice        = $('api-notice');
 const langBtn          = $('lang-btn');
 const langLabel        = $('lang-label');
 
@@ -56,8 +47,7 @@ const navTabs     = document.querySelectorAll('.nav-tab');
 const sections    = document.querySelectorAll('.section');
 const filterPills = document.querySelectorAll('.pill');
 
-// LocalStorage keys — separate from TarotMe to avoid conflicts
-const LS_API_KEY    = 'tarotmegem_api_key';
+// LocalStorage keys
 const LS_DISCLAIMER = 'tarotmegem_disclaimer_shown';
 const LS_LANG       = 'tarotmegem_lang';
 
@@ -131,7 +121,7 @@ async function storeDel(key) {
  * (e.g. browser cleared it), restore it from IndexedDB.
  */
 async function restoreStorage() {
-  const keys = [LS_API_KEY, LS_DISCLAIMER, LS_LANG];
+  const keys = [LS_DISCLAIMER, LS_LANG];
   for (const key of keys) {
     if (!localStorage.getItem(key)) {
       const val = await idbGet(key);
@@ -239,8 +229,6 @@ function applyTranslations() {
 
   cardSearch.placeholder    = t('search_ph');
   questionInput.placeholder = t('question_ph');
-  apiDot.title = localStorage.getItem(LS_API_KEY)
-    ? t('api_dot_on') : t('api_dot_off');
 
   const uploadTitleEl = $('upload-title-text');
   if (uploadTitleEl) {
@@ -295,7 +283,6 @@ async function init() {
     disclaimerModal.classList.remove('hidden');
   }
 
-  actualizarEstadoApiKey();
   applyTranslations();
   $('count-all').textContent = `(${CARTAS.length})`;
   bindEventos();
@@ -318,61 +305,6 @@ disclaimerAccept.addEventListener('click', () => {
   storeSave(LS_DISCLAIMER, '1'); // fire-and-forget async
   disclaimerModal.classList.add('hidden');
 });
-
-// ═══════════════════════════════════════
-// SETTINGS / API KEY
-// ═══════════════════════════════════════
-function openSettings() {
-  const key = localStorage.getItem(LS_API_KEY) || '';
-  apiKeyInput.value = key ? '••••••••••••••••••••' : '';
-  settingsStatus.textContent = '';
-  settingsModal.classList.remove('hidden');
-  setTimeout(() => apiKeyInput.focus(), 50);
-}
-window.openSettings = openSettings;
-
-settingsBtn.addEventListener('click', openSettings);
-settingsClose.addEventListener('click', () => settingsModal.classList.add('hidden'));
-settingsModal.addEventListener('click', e => {
-  if (e.target === settingsModal) settingsModal.classList.add('hidden');
-});
-apiKeyInput.addEventListener('focus', () => {
-  if (apiKeyInput.value.startsWith('•')) apiKeyInput.value = '';
-});
-
-apiKeySave.addEventListener('click', async () => {
-  const key = apiKeyInput.value.trim();
-  if (!key || key.startsWith('•')) {
-    settingsStatus.style.color = 'var(--warn)';
-    settingsStatus.textContent = key.startsWith('•') ? t('settings_nochange') : t('settings_invalid');
-    return;
-  }
-  if (!key.startsWith('AIza')) {
-    settingsStatus.style.color = 'var(--warn)';
-    settingsStatus.textContent = t('settings_prefix');
-    return;
-  }
-  await storeSave(LS_API_KEY, key);
-  actualizarEstadoApiKey();
-  settingsStatus.style.color = 'var(--success)';
-  settingsStatus.textContent = t('settings_saved');
-  setTimeout(() => settingsModal.classList.add('hidden'), 1400);
-});
-
-apiKeyClear.addEventListener('click', async () => {
-  await storeDel(LS_API_KEY);
-  apiKeyInput.value = '';
-  actualizarEstadoApiKey();
-  settingsStatus.style.color = 'var(--text3)';
-  settingsStatus.textContent = t('settings_deleted');
-});
-
-function actualizarEstadoApiKey() {
-  const tieneKey = !!localStorage.getItem(LS_API_KEY);
-  apiDot.classList.toggle('active', tieneKey);
-  apiDot.title = tieneKey ? t('api_dot_on') : t('api_dot_off');
-  apiNotice.classList.toggle('hidden', tieneKey);
-}
 
 // ═══════════════════════════════════════
 // NAVIGATION TABS
@@ -411,7 +343,6 @@ function bindEventos() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       cardModal.classList.add('hidden');
-      settingsModal.classList.add('hidden');
     }
   });
 
@@ -582,121 +513,146 @@ function limpiarImagen() {
 }
 
 // ═══════════════════════════════════════
-// READING — GEMINI API
+// READING — GEMINI WEB REDIRECT
+// No API key needed. Copies the full prompt to clipboard,
+// opens gemini.google.com in a new tab and shows step instructions.
 // ═══════════════════════════════════════
 function setupLectura() {
   questionInput.addEventListener('input', () => {
     charCount.textContent = questionInput.value.length;
     actualizarBotonLeer();
   });
-  readBtn.addEventListener('click', realizarLectura);
+  readBtn.addEventListener('click', enviarAGemini);
   newReadingBtn.addEventListener('click', () => {
     readingResult.classList.add('hidden');
     limpiarImagen();
     questionInput.value = '';
     charCount.textContent = '0';
     actualizarBotonLeer();
-    readingResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({ top: readBtn.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
   });
 }
 
 function actualizarBotonLeer() {
-  const listo = !!state.imagenBase64 && !state.interpretando;
+  // Enabled when there's an image OR a non-empty question (image is optional)
+  const listo = (!!state.imagenBase64 || questionInput.value.trim().length > 0) && !state.interpretando;
   readBtn.disabled = !listo;
   readBtnText.textContent = t(state.interpretando ? 'reading_btn_wait' : 'read_btn');
 }
 
-async function realizarLectura() {
-  const apiKey = localStorage.getItem(LS_API_KEY);
-  if (!apiKey) { openSettings(); return; }
-  if (!state.imagenBase64) return;
+async function enviarAGemini() {
+  if (state.interpretando) return;
 
   const pregunta = questionInput.value.trim();
+  const promptTemplate = pregunta ? t('prompt_with_q') : t('prompt_general');
+  const textoConsulta  = promptTemplate.replace('{q}', pregunta);
+  const promptCompleto = t('system_prompt') + '\n\n' + textoConsulta;
+
   state.interpretando = true;
   actualizarBotonLeer();
-  readBtn.classList.add('loading');
+
+  // 1. Copy prompt to clipboard (best-effort — called from user gesture)
+  let clipboardOk = false;
+  try {
+    await navigator.clipboard.writeText(promptCompleto);
+    clipboardOk = true;
+  } catch { /* clipboard denied or unavailable */ }
+
+  // 2. Open Gemini web in a new tab
+  const geminiWin = window.open('https://gemini.google.com/app', '_blank', 'noopener');
+
+  // 3. Show step-by-step guide
+  mostrarGuiaGemini(clipboardOk, promptCompleto, geminiWin);
+
+  state.interpretando = false;
+  actualizarBotonLeer();
 
   readingResult.classList.remove('hidden');
-  resultContent.innerHTML = `
-    <div class="loading-placeholder">
-      <div class="loading-dots"><span></span><span></span><span></span></div>
-      <p>${t('reading_thinking')}</p>
-    </div>`;
   readingResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
-  try {
-    const promptTemplate = pregunta ? t('prompt_with_q') : t('prompt_general');
-    const textoUsuario = promptTemplate.replace('{q}', pregunta);
+function mostrarGuiaGemini(clipboardOk, promptCompleto, geminiWin) {
+  const tieneImagen = !!state.imagenBase64;
 
-    // ── Google Gemini API (gemini-2.0-flash — free tier) ──
-    const GEMINI_MODEL = 'gemini-2.0-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+  // Build numbered steps
+  const pasos = [];
+  if (tieneImagen) {
+    pasos.push(`<li class="gemini-step">
+      <span class="gemini-step-icon">🖼️</span>
+      <div>
+        <span>${t('gemini_step_attach')}</span>
+        <div class="gemini-step-sub">
+          <span>${t('gemini_download_img').replace('⬇ ', '')}: </span>
+          <button class="link-btn" id="download-img-btn">⬇ ${t('gemini_download_img').replace('⬇ ', '')}</button>
+        </div>
+      </div>
+    </li>`);
+  }
+  pasos.push(`<li class="gemini-step">
+    <span class="gemini-step-icon">${clipboardOk ? '✓' : '📋'}</span>
+    <span>${clipboardOk ? t('gemini_step_paste_ok') : t('gemini_step_paste')}</span>
+  </li>`);
+  pasos.push(`<li class="gemini-step">
+    <span class="gemini-step-icon">🔮</span>
+    <span>${t('gemini_step_send')}</span>
+  </li>`);
 
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: t('system_prompt') }]
-        },
-        contents: [{
-          parts: [
-            { text: textoUsuario },
-            {
-              inline_data: {
-                mime_type: state.imagenTipo,
-                data: state.imagenBase64
-              }
-            }
-          ]
-        }],
-        generationConfig: {
-          maxOutputTokens: 1200,
-          temperature: 0.8,
-          topP: 0.95
-        }
-      })
+  resultContent.innerHTML = `
+    <div class="gemini-guide">
+      <ol class="gemini-steps">${pasos.join('')}</ol>
+
+      <div class="gemini-prompt-box">
+        <div class="gemini-prompt-header">
+          <span class="gemini-prompt-label">${t('gemini_prompt_label')}</span>
+          <button class="btn-copy-prompt" id="copy-prompt-btn">
+            ${clipboardOk ? '✓ ' + t('gemini_copied') : t('gemini_copy_btn')}
+          </button>
+        </div>
+        <pre class="gemini-prompt-text" id="gemini-prompt-text">${escapeHtml(promptCompleto)}</pre>
+      </div>
+
+      <div class="gemini-actions">
+        <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="btn-open-gemini">
+          ${t('gemini_open_btn')}
+        </a>
+      </div>
+    </div>`;
+
+  // Copy button
+  document.getElementById('copy-prompt-btn')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(promptCompleto);
+      const btn = document.getElementById('copy-prompt-btn');
+      if (btn) { btn.textContent = '✓ ' + t('gemini_copied'); }
+    } catch {
+      // Fallback: select the text
+      const pre = document.getElementById('gemini-prompt-text');
+      if (pre) {
+        const sel = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+  });
+
+  // Download image button
+  if (tieneImagen) {
+    document.getElementById('download-img-btn')?.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = `data:${state.imagenTipo};base64,${state.imagenBase64}`;
+      a.download = 'tirada-tarot.' + (state.imagenTipo?.split('/')[1] || 'jpg');
+      a.click();
     });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      const msg = err.error?.message || `Error ${resp.status}: ${resp.statusText}`;
-      throw new Error(msg);
-    }
-
-    const data  = await resp.json();
-    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text
-               || data.promptFeedback?.blockReason
-               || t('err_no_resp');
-
-    if (data.promptFeedback?.blockReason) {
-      throw new Error(t('err_blocked'));
-    }
-
-    mostrarResultado(texto);
-
-  } catch (err) {
-    resultContent.innerHTML = `
-      <p style="color:var(--danger)">
-        ${t('err_title')}<br>
-        <span style="font-size:0.85rem;color:var(--text2)">${err.message}</span>
-      </p>
-      <p style="font-size:0.82rem;color:var(--text3);margin-top:8px">
-        ${t('err_check')} <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>.
-      </p>`;
-  } finally {
-    state.interpretando = false;
-    readBtn.classList.remove('loading');
-    actualizarBotonLeer();
   }
 }
 
-function mostrarResultado(texto) {
-  resultContent.innerHTML = texto
-    .split(/\n{2,}/)
-    .filter(p => p.trim())
-    .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
-    .join('');
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 // ═══════════════════════════════════════
