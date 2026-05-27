@@ -689,19 +689,17 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloa
       </div>
 
       <div class="gemini-actions">
-        <button type="button" class="btn-open-gemini" id="gemini-open-btn"
-                data-url="${geminiUrl}">
+        <a href="${geminiUrl}" target="_blank" rel="noopener noreferrer"
+           class="btn-open-gemini" id="gemini-open-btn">
           ${t('gemini_open_btn')}
-        </button>
+        </a>
       </div>
     </div>`;
 
-  // Open Gemini button — window.open without features string preserves user gesture context
-  // and is treated as a new tab (not a popup) in Chrome/Android WebView/TWA
-  document.getElementById('gemini-open-btn')?.addEventListener('click', () => {
-    const url = document.getElementById('gemini-open-btn').dataset.url;
-    window.open(url, '_blank');
-  });
+  // NOTE: gemini-open-btn is now a plain <a href> — no JS needed.
+  // In Android TWA, tapping a native anchor to an out-of-scope URL opens
+  // it in Chrome Custom Tabs (a new Android activity), which is the
+  // correct behaviour on mobile.
 
   // Copy button
   document.getElementById('copy-prompt-btn')?.addEventListener('click', async () => {
