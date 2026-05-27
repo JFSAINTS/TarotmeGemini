@@ -569,7 +569,12 @@ async function enviarAGemini() {
   const pregunta = questionInput.value.trim();
   const promptTemplate = pregunta ? t('prompt_with_q') : t('prompt_general');
   const textoConsulta  = promptTemplate.replace('{q}', pregunta);
-  const promptCompleto = t('system_prompt') + '\n\n' + textoConsulta;
+  // Explicit language instruction so Gemini always replies in the app's active language
+  const langCode        = getLang();
+  const langInstruction = langCode === 'es'
+    ? 'IMPORTANTE: Responde siempre en español, independientemente del idioma de la pregunta.'
+    : 'IMPORTANT: Always respond in English, regardless of the language of the question.';
+  const promptCompleto  = t('system_prompt') + '\n\n' + langInstruction + '\n\n' + textoConsulta;
 
   state.interpretando = true;
   actualizarBotonLeer();
@@ -691,10 +696,19 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloa
       </div>
     </div>`;
 
-  // Open Gemini button — uses window.open so the PWA/TWA doesn't navigate away
+  // Open Gemini button — anchor click is the most reliable cross-browser/PWA approach
+  // window.open() with a features string gets treated as a popup and may be blocked or
+  // navigate in the same window on Android standalone PWA / TWA
   document.getElementById('gemini-open-btn')?.addEventListener('click', () => {
     const url = document.getElementById('gemini-open-btn').dataset.url;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+    document.body.appendChild(a);
+    a.click();
+    requestAnimationFrame(() => { if (a.parentNode) a.parentNode.removeChild(a); });
   });
 
   // Copy button
