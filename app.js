@@ -551,18 +551,40 @@ async function enviarAGemini() {
   state.interpretando = true;
   actualizarBotonLeer();
 
-  // 1. Copy prompt to clipboard (best-effort — called from user gesture)
+  // ── 1. Clipboard (fallback for when ?q= doesn't land) ──────────────────
   let clipboardOk = false;
   try {
     await navigator.clipboard.writeText(promptCompleto);
     clipboardOk = true;
-  } catch { /* clipboard denied or unavailable */ }
+  } catch { /* denied — graceful fallback */ }
 
-  // 2. Open Gemini web in a new tab
-  const geminiWin = window.open('https://gemini.google.com/app', '_blank', 'noopener');
+  // ── 2. Auto-download image so user can drag it straight into Gemini ────
+  let imageDownloaded = false;
+  if (state.imagenBase64) {
+    try {
+      const a = document.createElement('a');
+      a.href    = `data:${state.imagenTipo};base64,${state.imagenBase64}`;
+      a.download = 'tirada-tarot.' + (state.imagenTipo?.split('/')[1] || 'jpg');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      imageDownloaded = true;
+    } catch { /* browser blocked the download */ }
+  }
 
-  // 3. Show step-by-step guide
-  mostrarGuiaGemini(clipboardOk, promptCompleto, geminiWin);
+  // ── 3. Open Gemini — pre-fill text via ?q= when prompt fits in URL ─────
+  // URL-encoded prompt < 4 000 chars → use ?q= so text lands automatically.
+  // Longer prompts fall back to plain URL (user pastes from clipboard).
+  const encoded     = encodeURIComponent(promptCompleto);
+  const textViaUrl  = encoded.length <= 4000;
+  const geminiUrl   = textViaUrl
+    ? `https://gemini.google.com/app?q=${encoded}`
+    : 'https://gemini.google.com/app';
+
+  window.open(geminiUrl, '_blank', 'noopener');
+
+  // ── 4. Show contextual guide ────────────────────────────────────────────
+  mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloaded, geminiUrl);
 
   state.interpretando = false;
   actualizarBotonLeer();
@@ -571,30 +593,49 @@ async function enviarAGemini() {
   readingResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function mostrarGuiaGemini(clipboardOk, promptCompleto, geminiWin) {
+function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloaded, geminiUrl) {
   const tieneImagen = !!state.imagenBase64;
-
-  // Build numbered steps
   const pasos = [];
-  if (tieneImagen) {
+
+  // Step A — text status
+  if (textViaUrl) {
+    pasos.push(`<li class="gemini-step gemini-step--ok">
+      <span class="gemini-step-icon">✓</span>
+      <span>${t('gemini_text_prefilled')}</span>
+    </li>`);
+  } else {
+    // URL too long: user must paste from clipboard
     pasos.push(`<li class="gemini-step">
-      <span class="gemini-step-icon">🖼️</span>
-      <div>
-        <span>${t('gemini_step_attach')}</span>
-        <div class="gemini-step-sub">
-          <span>${t('gemini_download_img').replace('⬇ ', '')}: </span>
-          <button class="link-btn" id="download-img-btn">⬇ ${t('gemini_download_img').replace('⬇ ', '')}</button>
-        </div>
-      </div>
+      <span class="gemini-step-icon">${clipboardOk ? '📋' : '⚠️'}</span>
+      <span>${clipboardOk ? t('gemini_step_paste_ok') : t('gemini_step_paste')}</span>
     </li>`);
   }
-  pasos.push(`<li class="gemini-step">
-    <span class="gemini-step-icon">${clipboardOk ? '✓' : '📋'}</span>
-    <span>${clipboardOk ? t('gemini_step_paste_ok') : t('gemini_step_paste')}</span>
-  </li>`);
-  pasos.push(`<li class="gemini-step">
-    <span class="gemini-step-icon">🔮</span>
-    <span>${t('gemini_step_send')}</span>
+
+  // Step B — image (only when one was uploaded)
+  if (tieneImagen) {
+    if (imageDownloaded) {
+      pasos.push(`<li class="gemini-step gemini-step--ok">
+        <span class="gemini-step-icon">🖼️</span>
+        <span>${t('gemini_img_downloaded')}</span>
+      </li>`);
+    } else {
+      pasos.push(`<li class="gemini-step">
+        <span class="gemini-step-icon">🖼️</span>
+        <div>
+          <span>${t('gemini_step_attach')}</span>
+          <div class="gemini-step-sub">
+            <button class="link-btn" id="download-img-btn">${t('gemini_download_img')}</button>
+          </div>
+        </div>
+      </li>`);
+    }
+  }
+
+  // Step C — send
+  const sendKey = tieneImagen ? 'gemini_step_send_img' : 'gemini_step_send';
+  pasos.push(`<li class="gemini-step gemini-step--cta">
+    <span class="gemini-step-icon">🚀</span>
+    <span>${t(sendKey)}</span>
   </li>`);
 
   resultContent.innerHTML = `
@@ -612,7 +653,7 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, geminiWin) {
       </div>
 
       <div class="gemini-actions">
-        <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="btn-open-gemini">
+        <a href="${geminiUrl}" target="_blank" rel="noopener" class="btn-open-gemini">
           ${t('gemini_open_btn')}
         </a>
       </div>
@@ -623,9 +664,8 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, geminiWin) {
     try {
       await navigator.clipboard.writeText(promptCompleto);
       const btn = document.getElementById('copy-prompt-btn');
-      if (btn) { btn.textContent = '✓ ' + t('gemini_copied'); }
+      if (btn) btn.textContent = '✓ ' + t('gemini_copied');
     } catch {
-      // Fallback: select the text
       const pre = document.getElementById('gemini-prompt-text');
       if (pre) {
         const sel = window.getSelection();
@@ -637,15 +677,15 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, geminiWin) {
     }
   });
 
-  // Download image button
-  if (tieneImagen) {
-    document.getElementById('download-img-btn')?.addEventListener('click', () => {
-      const a = document.createElement('a');
-      a.href = `data:${state.imagenTipo};base64,${state.imagenBase64}`;
-      a.download = 'tirada-tarot.' + (state.imagenTipo?.split('/')[1] || 'jpg');
-      a.click();
-    });
-  }
+  // Manual download button (shown if auto-download failed)
+  document.getElementById('download-img-btn')?.addEventListener('click', () => {
+    const a = document.createElement('a');
+    a.href    = `data:${state.imagenTipo};base64,${state.imagenBase64}`;
+    a.download = 'tirada-tarot.' + (state.imagenTipo?.split('/')[1] || 'jpg');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
 }
 
 function escapeHtml(str) {

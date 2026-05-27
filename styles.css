@@ -1339,6 +1339,20 @@ details[open] .faq-q::after { content: "－"; }
   line-height: 1.5;
 }
 
+/* Completed step — green tint */
+.gemini-step--ok {
+  background: rgba(34,197,94,0.07);
+  border-color: rgba(34,197,94,0.3);
+  color: var(--text);
+}
+
+/* CTA step — purple/gold highlight */
+.gemini-step--cta {
+  background: rgba(124,58,237,0.1);
+  border-color: rgba(201,168,76,0.3);
+  font-weight: 600;
+}
+
 .gemini-step-icon {
   font-size: 1.25rem;
   line-height: 1;

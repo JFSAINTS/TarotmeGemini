@@ -53,6 +53,9 @@ const UI = {
     new_reading:      'Nueva lectura',
 
     // Gemini web guide (shown after clicking the button)
+    gemini_text_prefilled: '✓ Texto enviado a Gemini automáticamente',
+    gemini_img_downloaded: '✓ Imagen descargada — arrástrala al chat de Gemini o usa el icono 📎',
+    gemini_step_send_img:  'Adjunta la imagen y pulsa Enviar en Gemini 🚀',
     gemini_step_attach:   'En Gemini, adjunta la imagen de tu tirada (icono 📎 o arrastra el archivo)',
     gemini_step_paste_ok: '✓ Consulta copiada — pégala en Gemini con <kbd>Ctrl+V</kbd> / <kbd>⌘V</kbd> y pulsa enviar',
     gemini_step_paste:    'Copia la consulta de abajo y pégala en el chat de Gemini',
@@ -314,6 +317,9 @@ Pautas importantes:
     new_reading:      'New reading',
 
     // Gemini web guide (shown after clicking the button)
+    gemini_text_prefilled: '✓ Text sent to Gemini automatically',
+    gemini_img_downloaded: '✓ Image downloaded — drag it into the Gemini chat or use the 📎 icon',
+    gemini_step_send_img:  'Attach the image and press Send in Gemini 🚀',
     gemini_step_attach:   'In Gemini, attach your spread image (📎 icon or drag the file)',
     gemini_step_paste_ok: '✓ Query copied — paste it in Gemini with <kbd>Ctrl+V</kbd> / <kbd>⌘V</kbd> and press send',
     gemini_step_paste:    'Copy the query below and paste it in the Gemini chat',
