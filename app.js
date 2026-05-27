@@ -579,38 +579,25 @@ async function enviarAGemini() {
   state.interpretando = true;
   actualizarBotonLeer();
 
-  // ── 1. Clipboard (fallback for when ?q= doesn't land) ──────────────────
+  // ── 1. Copy prompt to clipboard ────────────────────────────────────────
   let clipboardOk = false;
   try {
     await navigator.clipboard.writeText(promptCompleto);
     clipboardOk = true;
   } catch { /* denied — graceful fallback */ }
 
-  // ── 2. Auto-download image so user can drag it straight into Gemini ────
-  let imageDownloaded = false;
-  if (state.imagenBase64) {
-    try {
-      const a = document.createElement('a');
-      a.href    = `data:${state.imagenTipo};base64,${state.imagenBase64}`;
-      a.download = 'tirada-tarot.' + (state.imagenTipo?.split('/')[1] || 'jpg');
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      imageDownloaded = true;
-    } catch { /* browser blocked the download */ }
-  }
+  // ── 2. Build Google AI URL — embed prompt in ?q= when it fits ──────────
+  // google.com/search with udm=50 opens Google AI Mode (Gemini-powered).
+  // qsubts must be the current timestamp (ms) for the session to be fresh.
+  const encoded    = encodeURIComponent(promptCompleto);
+  const qsubts     = Date.now();
+  const aiParams   = `sourceid=chrome&ie=UTF-8&amc=1&udm=50&aep=42&cud=1&qsubts=${qsubts}&source=chrome.crn.rb`;
+  const googleAiUrl = encoded.length <= 3000
+    ? `https://www.google.com/search?q=${encoded}&${aiParams}`
+    : `https://www.google.com/search?q=&${aiParams}`;
 
-  // ── 3. Open Gemini — pre-fill text via ?q= when prompt fits in URL ─────
-  // URL-encoded prompt < 4 000 chars → use ?q= so text lands automatically.
-  // Longer prompts fall back to plain URL (user pastes from clipboard).
-  const encoded     = encodeURIComponent(promptCompleto);
-  const textViaUrl  = encoded.length <= 4000;
-  const geminiUrl   = textViaUrl
-    ? `https://gemini.google.com/app?q=${encoded}`
-    : 'https://gemini.google.com/app';
-
-  // ── 3. Show contextual guide (Gemini opens only when user clicks the button) ──
-  mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloaded, geminiUrl);
+  // ── 3. Show guide ───────────────────────────────────────────────────────
+  mostrarGuiaGemini(clipboardOk, promptCompleto, googleAiUrl);
 
   state.interpretando = false;
   actualizarBotonLeer();
@@ -619,81 +606,31 @@ async function enviarAGemini() {
   readingResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloaded, geminiUrl) {
+function mostrarGuiaGemini(clipboardOk, promptCompleto, googleAiUrl) {
   const tieneImagen = !!state.imagenBase64;
   const pasos = [];
 
-  // Step A — text status
-  if (textViaUrl) {
-    pasos.push(`<li class="gemini-step gemini-step--ok">
-      <span class="gemini-step-icon">✓</span>
-      <span>${t('gemini_text_prefilled')}</span>
-    </li>`);
-  } else {
-    // URL too long: user must paste from clipboard
-    pasos.push(`<li class="gemini-step">
-      <span class="gemini-step-icon">${clipboardOk ? '📋' : '⚠️'}</span>
-      <span>${clipboardOk ? t('gemini_step_paste_ok') : t('gemini_step_paste')}</span>
-    </li>`);
-  }
+  // Step A — clipboard status
+  pasos.push(`<li class="gemini-step ${clipboardOk ? 'gemini-step--ok' : ''}">
+    <span class="gemini-step-icon">${clipboardOk ? '✓' : '📋'}</span>
+    <span>${t(clipboardOk ? 'gemini_step_paste_ok' : 'gemini_step_paste')}</span>
+  </li>`);
 
-  // Step B — image (only when one was uploaded)
+  // Step B — image reminder (photo is already in the device gallery from step 1;
+  //           no download needed — user just attaches it from there)
   if (tieneImagen) {
-    if (imageDownloaded) {
-      pasos.push(`<li class="gemini-step gemini-step--ok">
-        <span class="gemini-step-icon">🖼️</span>
-        <span>${t('gemini_img_downloaded')}</span>
-      </li>`);
-    } else {
-      pasos.push(`<li class="gemini-step">
-        <span class="gemini-step-icon">🖼️</span>
-        <div>
-          <span>${t('gemini_step_attach')}</span>
-          <div class="gemini-step-sub">
-            <button class="link-btn" id="download-img-btn">${t('gemini_download_img')}</button>
-          </div>
-        </div>
-      </li>`);
-    }
+    pasos.push(`<li class="gemini-step">
+      <span class="gemini-step-icon">🖼️</span>
+      <span>${t('gemini_step_attach_gallery')}</span>
+    </li>`);
   }
 
-  // Step C — visual hint (Gemini interface screenshot)
-  const hintCapKey = tieneImagen ? 'gemini_hint_caption_img' : 'gemini_hint_caption';
-  pasos.push(`<li class="gemini-step gemini-step--hint">
-    <img src="./gemini-tip.png"
-         alt="${t('gemini_hint_alt')}"
-         class="gemini-hint-img"
-         onerror="this.closest('li').style.display='none'">
-    <span class="gemini-hint-caption">${t(hintCapKey)}</span>
-  </li>`);
-
-  // Step D — send
-  const sendKey = tieneImagen ? 'gemini_step_send_img' : 'gemini_step_send';
-  pasos.push(`<li class="gemini-step gemini-step--cta">
-    <span class="gemini-step-icon">🚀</span>
-    <span>${t(sendKey)}</span>
-  </li>`);
-
-  // ── Build the correct <a href> for the current platform ────────────────
-  // Chrome BLOCKS intent:// URLs loaded via window.location.href (security).
-  // They ONLY work when placed directly in an <a href> that the user taps.
-  // On desktop / iOS we use the regular URL with target="_blank".
-  const isAndroid = /android/i.test(navigator.userAgent);
-  let linkHref, linkExtras;
-  if (isAndroid) {
-    // intent:// URL → Android OS intercepts it and dispatches to external browser,
-    // completely bypassing Chrome / TWA navigation.
-    const stripped = geminiUrl.replace(/^https?:\/\//, '');
-    const fallback = encodeURIComponent(geminiUrl.split('?')[0]);
-    linkHref   = `intent://${stripped}#Intent;scheme=https;` +
-                 `action=android.intent.action.VIEW;` +
-                 `category=android.intent.category.BROWSABLE;` +
-                 `S.browser_fallback_url=${fallback};end`;
-    linkExtras = '';                        // no target="_blank" needed for intent URLs
-  } else {
-    linkHref   = geminiUrl;
-    linkExtras = 'target="_blank" rel="noopener noreferrer"';
-  }
+  // On Android (TWA): plain <a href> without target="_blank" so the browser
+  // triggers the standard out-of-scope navigation → Chrome Custom Tabs
+  // (a separate Android activity that opens on top of the app).
+  // On desktop / iOS: target="_blank" opens a new tab normally.
+  const isAndroid  = /android/i.test(navigator.userAgent);
+  const linkExtras = isAndroid ? '' : 'target="_blank" rel="noopener noreferrer"';
 
   resultContent.innerHTML = `
     <div class="gemini-guide">
@@ -710,14 +647,12 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloa
       </div>
 
       <div class="gemini-actions">
-        <a href="${linkHref}" ${linkExtras}
+        <a href="${googleAiUrl}" ${linkExtras}
            class="btn-open-gemini" id="gemini-open-btn">
-          ${t('gemini_open_btn')}
+          ${t('ask_gemini_btn')}
         </a>
       </div>
     </div>`;
-  // No JS click listener needed — the intent:// href is handled natively by
-  // Android OS when the user physically taps the <a> element.
 
   // Copy button
   document.getElementById('copy-prompt-btn')?.addEventListener('click', async () => {
@@ -735,16 +670,6 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloa
         sel.addRange(range);
       }
     }
-  });
-
-  // Manual download button (shown if auto-download failed)
-  document.getElementById('download-img-btn')?.addEventListener('click', () => {
-    const a = document.createElement('a');
-    a.href    = `data:${state.imagenTipo};base64,${state.imagenBase64}`;
-    a.download = 'tirada-tarot.' + (state.imagenTipo?.split('/')[1] || 'jpg');
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
   });
 }
 
