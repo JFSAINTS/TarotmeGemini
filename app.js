@@ -31,6 +31,7 @@ const noResults        = $('no-results');
 
 const uploadZone       = $('upload-zone');
 const imageInput       = $('image-input');
+const cameraInput      = $('camera-input');
 const uploadPlaceholder= $('upload-placeholder');
 const uploadPreview    = $('upload-preview');
 const previewImg       = $('preview-img');
@@ -232,7 +233,7 @@ function applyTranslations() {
 
   const uploadTitleEl = $('upload-title-text');
   if (uploadTitleEl) {
-    uploadTitleEl.innerHTML = t('upload_title') + '<br>' + t('upload_or');
+    uploadTitleEl.textContent = t('upload_title');
   }
 
   document.querySelectorAll('.card-tab').forEach(btn => {
@@ -464,9 +465,26 @@ function abrirCartaDetalle(id) {
 // UPLOAD ZONE
 // ═══════════════════════════════════════
 function setupUpload() {
+  // Clicking the zone itself (outside buttons) opens gallery
   uploadZone.addEventListener('click', e => {
-    if (!e.target.closest('.clear-img-btn')) imageInput.click();
+    if (!e.target.closest('.clear-img-btn') &&
+        !e.target.closest('.upload-action-btn')) {
+      imageInput.click();
+    }
   });
+
+  // Gallery button → file picker
+  $('gallery-btn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    imageInput.click();
+  });
+
+  // Camera button → direct camera capture
+  $('camera-btn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    cameraInput.click();
+  });
+
   uploadZone.addEventListener('dragover', e => {
     e.preventDefault();
     uploadZone.classList.add('drag-over');
@@ -482,6 +500,11 @@ function setupUpload() {
     const file = e.target.files[0];
     if (file) procesarImagen(file);
     imageInput.value = '';
+  });
+  cameraInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) procesarImagen(file);
+    cameraInput.value = '';
   });
   clearImageBtn.addEventListener('click', e => {
     e.stopPropagation();
