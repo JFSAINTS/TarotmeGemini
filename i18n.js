@@ -48,7 +48,7 @@ const UI = {
     upload_hint:      'Acepta JPG, PNG, WEBP',
     step2_label:      'Tu pregunta o tema',
     question_ph:      'Escribe aquí tu pregunta o el tema sobre el que quieres reflexionar…\nEjemplo: ¿Cómo está mi situación sentimental en este momento?\nEjemplo: Quiero entender qué me dice el tarot sobre mi trabajo.',
-    read_btn:         '✦ Abrir en Gemini',
+    read_btn:         'Abrir en Gemini',
     reading_btn_wait: 'Preparando…',
     new_reading:      'Nueva lectura',
 
@@ -309,7 +309,7 @@ Pautas importantes:
     upload_hint:      'Accepts JPG, PNG, WEBP',
     step2_label:      'Your question or topic',
     question_ph:      'Write your question or the topic you want to reflect on…\nExample: What does the tarot say about my love life right now?\nExample: I want to understand what the cards say about my career.',
-    read_btn:         '✦ Open in Gemini',
+    read_btn:         'Open in Gemini',
     reading_btn_wait: 'Preparing…',
     new_reading:      'New reading',
 
