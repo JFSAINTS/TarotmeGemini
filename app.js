@@ -696,19 +696,11 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloa
       </div>
     </div>`;
 
-  // Open Gemini button — anchor click is the most reliable cross-browser/PWA approach
-  // window.open() with a features string gets treated as a popup and may be blocked or
-  // navigate in the same window on Android standalone PWA / TWA
+  // Open Gemini button — window.open without features string preserves user gesture context
+  // and is treated as a new tab (not a popup) in Chrome/Android WebView/TWA
   document.getElementById('gemini-open-btn')?.addEventListener('click', () => {
     const url = document.getElementById('gemini-open-btn').dataset.url;
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
-    document.body.appendChild(a);
-    a.click();
-    requestAnimationFrame(() => { if (a.parentNode) a.parentNode.removeChild(a); });
+    window.open(url, '_blank');
   });
 
   // Copy button
