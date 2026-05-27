@@ -1353,6 +1353,43 @@ details[open] .faq-q::after { content: "－"; }
   font-weight: 600;
 }
 
+/* Hint step — screenshot + caption */
+.gemini-step--hint {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border-color: rgba(201,168,76,0.2);
+}
+
+.gemini-hint-img {
+  width: 100%;
+  display: block;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.gemini-hint-caption {
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  color: var(--text2);
+  text-align: center;
+  line-height: 1.5;
+  background: var(--bg3);
+}
+
+.gemini-hint-caption kbd {
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.78rem;
+  font-family: monospace;
+  color: var(--gold2);
+}
+
+.gemini-hint-caption strong { color: var(--gold2); }
+
 .gemini-step-icon {
   font-size: 1.25rem;
   line-height: 1;

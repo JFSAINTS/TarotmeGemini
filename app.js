@@ -631,7 +631,17 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloa
     }
   }
 
-  // Step C — send
+  // Step C — visual hint (Gemini interface screenshot)
+  const hintCapKey = tieneImagen ? 'gemini_hint_caption_img' : 'gemini_hint_caption';
+  pasos.push(`<li class="gemini-step gemini-step--hint">
+    <img src="./gemini-tip.png"
+         alt="${t('gemini_hint_alt')}"
+         class="gemini-hint-img"
+         onerror="this.closest('li').style.display='none'">
+    <span class="gemini-hint-caption">${t(hintCapKey)}</span>
+  </li>`);
+
+  // Step D — send
   const sendKey = tieneImagen ? 'gemini_step_send_img' : 'gemini_step_send';
   pasos.push(`<li class="gemini-step gemini-step--cta">
     <span class="gemini-step-icon">🚀</span>

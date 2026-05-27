@@ -1,5 +1,5 @@
 // TarotMe Gemini — Service Worker
-const CACHE = 'tarotmegem-v1';
+const CACHE = 'tarotmegem-v2';
 const ASSETS = [
   './',
   './index.html',
