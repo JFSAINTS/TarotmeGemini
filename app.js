@@ -462,6 +462,26 @@ function abrirCartaDetalle(id) {
 }
 
 // ═══════════════════════════════════════
+// Saves a camera-captured photo to the device gallery / Downloads folder
+// so the user can easily find and attach it later (e.g. in Google AI chat).
+// Only runs on mobile — desktop has no need for this.
+function guardarFotoEnGaleria(file) {
+  if (!file || !/android|iphone|ipad|ipod/i.test(navigator.userAgent)) return;
+  try {
+    const ext = (file.type.split('/')[1] || file.name?.split('.').pop() || 'jpg')
+                  .replace('jpeg', 'jpg');
+    const url  = URL.createObjectURL(file);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `tirada-tarot-${Date.now()}.${ext}`;
+    a.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  } catch { /* graceful — some browsers may block programmatic downloads */ }
+}
+
 // UPLOAD ZONE
 // ═══════════════════════════════════════
 function setupUpload() {
@@ -503,7 +523,10 @@ function setupUpload() {
   });
   cameraInput.addEventListener('change', e => {
     const file = e.target.files[0];
-    if (file) procesarImagen(file);
+    if (file) {
+      procesarImagen(file);
+      guardarFotoEnGaleria(file); // save to gallery so user can attach it in Google AI
+    }
     cameraInput.value = '';
   });
   clearImageBtn.addEventListener('click', e => {
