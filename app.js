@@ -684,11 +684,18 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloa
       </div>
 
       <div class="gemini-actions">
-        <a href="${geminiUrl}" target="_blank" rel="noopener" class="btn-open-gemini">
+        <button type="button" class="btn-open-gemini" id="gemini-open-btn"
+                data-url="${geminiUrl}">
           ${t('gemini_open_btn')}
-        </a>
+        </button>
       </div>
     </div>`;
+
+  // Open Gemini button — uses window.open so the PWA/TWA doesn't navigate away
+  document.getElementById('gemini-open-btn')?.addEventListener('click', () => {
+    const url = document.getElementById('gemini-open-btn').dataset.url;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  });
 
   // Copy button
   document.getElementById('copy-prompt-btn')?.addEventListener('click', async () => {
