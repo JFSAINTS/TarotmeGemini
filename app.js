@@ -604,9 +604,7 @@ async function enviarAGemini() {
     ? `https://gemini.google.com/app?q=${encoded}`
     : 'https://gemini.google.com/app';
 
-  window.open(geminiUrl, '_blank', 'noopener');
-
-  // ── 4. Show contextual guide ────────────────────────────────────────────
+  // ── 3. Show contextual guide (Gemini opens only when user clicks the button) ──
   mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloaded, geminiUrl);
 
   state.interpretando = false;

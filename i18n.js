@@ -50,7 +50,7 @@ const UI = {
     upload_hint:      'Acepta JPG, PNG, WEBP',
     step2_label:      'Tu pregunta o tema',
     question_ph:      'Escribe aquí tu pregunta o el tema sobre el que quieres reflexionar…\nEjemplo: ¿Cómo está mi situación sentimental en este momento?\nEjemplo: Quiero entender qué me dice el tarot sobre mi trabajo.',
-    read_btn:         'Abrir en Gemini',
+    read_btn:         'Preparar consulta',
     reading_btn_wait: 'Preparando…',
     new_reading:      'Nueva lectura',
 
@@ -68,7 +68,7 @@ const UI = {
     gemini_prompt_label:  'Tu consulta para Gemini:',
     gemini_copy_btn:      '📋 Copiar consulta',
     gemini_copied:        'Copiado ✓',
-    gemini_open_btn:      '✦ Abrir Gemini de nuevo',
+    gemini_open_btn:      '✦ Abrir en Gemini ahora',
     gemini_download_img:  '⬇ Descargar imagen',
     gemini_tab_opened:    'Se abrió Gemini en una nueva pestaña.',
 
@@ -319,7 +319,7 @@ Pautas importantes:
     upload_hint:      'Accepts JPG, PNG, WEBP',
     step2_label:      'Your question or topic',
     question_ph:      'Write your question or the topic you want to reflect on…\nExample: What does the tarot say about my love life right now?\nExample: I want to understand what the cards say about my career.',
-    read_btn:         'Open in Gemini',
+    read_btn:         'Prepare reading',
     reading_btn_wait: 'Preparing…',
     new_reading:      'New reading',
 
@@ -337,7 +337,7 @@ Pautas importantes:
     gemini_prompt_label:  'Your query for Gemini:',
     gemini_copy_btn:      '📋 Copy query',
     gemini_copied:        'Copied ✓',
-    gemini_open_btn:      '✦ Open Gemini again',
+    gemini_open_btn:      '✦ Open in Gemini now',
     gemini_download_img:  '⬇ Download image',
     gemini_tab_opened:    'Gemini opened in a new tab.',
 
