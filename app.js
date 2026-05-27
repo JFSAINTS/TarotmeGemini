@@ -690,16 +690,36 @@ function mostrarGuiaGemini(clipboardOk, promptCompleto, textViaUrl, imageDownloa
 
       <div class="gemini-actions">
         <a href="${geminiUrl}" target="_blank" rel="noopener noreferrer"
-           class="btn-open-gemini" id="gemini-open-btn">
+           class="btn-open-gemini" id="gemini-open-btn"
+           data-url="${geminiUrl}">
           ${t('gemini_open_btn')}
         </a>
       </div>
     </div>`;
 
-  // NOTE: gemini-open-btn is now a plain <a href> — no JS needed.
-  // In Android TWA, tapping a native anchor to an out-of-scope URL opens
-  // it in Chrome Custom Tabs (a new Android activity), which is the
-  // correct behaviour on mobile.
+  // ── Gemini button: open in external browser ──────────────────────────────
+  // On Android/TWA, window.open and target="_blank" both navigate inside the
+  // same Chrome process (replacing the app). The only reliable way to open an
+  // external activity is an Android Intent URL (intent://…#Intent;…;end),
+  // which is handled by the Android OS, not by Chrome.
+  // On non-Android we let the native <a target="_blank"> work as-is.
+  document.getElementById('gemini-open-btn')?.addEventListener('click', function (e) {
+    if (!/android/i.test(navigator.userAgent)) return; // desktop/iOS → follow href normally
+    e.preventDefault();
+
+    const url = this.dataset.url || this.getAttribute('href');
+    // Strip scheme so the intent host starts right after intent://
+    const stripped  = url.replace(/^https?:\/\//, '');
+    // Use the base URL (no query) as fallback in case the intent can't be resolved
+    const fallback  = encodeURIComponent(url.split('?')[0]);
+
+    window.location.href =
+      `intent://${stripped}` +
+      `#Intent;scheme=https;` +
+      `action=android.intent.action.VIEW;` +
+      `category=android.intent.category.BROWSABLE;` +
+      `S.browser_fallback_url=${fallback};end`;
+  });
 
   // Copy button
   document.getElementById('copy-prompt-btn')?.addEventListener('click', async () => {
