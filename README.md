@@ -6,6 +6,14 @@
 
 ---
 
+## 🕊️ Sin ánimo de lucro · Libre distribución
+
+TarotMe Gemini es un proyecto **sin ánimo de lucro** y de **libre distribución**. Puedes usarlo, compartirlo y distribuirlo libremente. No hay suscripciones, no hay datos que vender, no hay publicidad.
+
+**El valor y la utilidad de la aplicación residen en ti** — en la intención que traes a la tirada, en las preguntas que te haces, en cómo integras lo que las cartas te muestran. La tecnología aquí es solo un espejo.
+
+---
+
 ## ¿Qué es TarotMe Gemini?
 
 TarotMe Gemini es una aplicación web progresiva (PWA) gratuita que combina una **biblioteca completa de las 78 cartas del Tarot Rider-Waite** con la posibilidad de solicitar una **interpretación asistida por IA** a través de tu propia cuenta de Google Gemini, sin coste ni registro.
